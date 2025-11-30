@@ -1,0 +1,10 @@
+
+node_modules/
+client/node_modules/
+backend/functions/node_modules/
+.env
+*.log
+.DS_Store
+server/serviceAccountKey.json
+backend/functions/config/serviceAccountKey.json
+backend/functions/serviceAccountKey.json

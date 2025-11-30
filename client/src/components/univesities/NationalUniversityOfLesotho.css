@@ -1,0 +1,289 @@
+.nul-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #003366 0%, #004080 50%, #00509e 100%);
+    color: white;
+    font-family: 'Arial', sans-serif;
+  }
+  
+  /* Header Styles */
+  .nul-header {
+    padding: 20px 40px;
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+  }
+  
+  .nul-logo-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .nul-logo {
+    display: flex;
+    align-items: center;
+  }
+  
+  .logo-circle {
+    width: 80px;
+    height: 80px;
+    border: 3px solid #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(45deg, #ff6b35, #ff8e53);
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+  }
+  
+  .logo-text {
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  }
+  
+  .nul-anniversary {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px 25px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .anniversary-years {
+    font-size: 28px;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    margin-bottom: 5px;
+  }
+  
+  .anniversary-text {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    margin-bottom: 5px;
+    color: #ffffff;
+  }
+  
+  .anniversary-dates {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffd700;
+  }
+  
+  /* Main Content */
+  .nul-main {
+    padding: 40px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .nul-content {
+    text-align: center;
+  }
+  
+  .nul-title {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 50px;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+    background: linear-gradient(45deg, #ffffff, #ffd700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* Study Button */
+  .study-section {
+    margin: 60px 0;
+  }
+  
+  .study-button {
+    background: linear-gradient(45deg, #ff6b35, #ff8e53);
+    color: white;
+    border: none;
+    padding: 20px 40px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin: 0 auto;
+  }
+  
+  .study-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(255, 107, 53, 0.6);
+    background: linear-gradient(45deg, #ff8e53, #ff6b35);
+  }
+  
+  .button-arrow {
+    font-size: 2rem;
+    transition: transform 0.3s ease;
+  }
+  
+  .study-button:hover .button-arrow {
+    transform: translateX(5px);
+  }
+  
+  /* University Information */
+  .university-info {
+    margin-top: 80px;
+    text-align: left;
+  }
+  
+  .info-section {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 30px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .info-section h3 {
+    color: #ffd700;
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #ffd700;
+    padding-bottom: 10px;
+  }
+  
+  .info-section p {
+    line-height: 1.6;
+    font-size: 1.1rem;
+    color: #e6e6e6;
+  }
+  
+  /* Programs Grid */
+  .programs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+  }
+  
+  .program-card {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .program-card h4 {
+    color: #ffd700;
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+  }
+  
+  .program-card ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .program-card li {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e6e6e6;
+  }
+  
+  .program-card li:last-child {
+    border-bottom: none;
+  }
+  
+  /* Faculties List */
+  .faculties-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+  }
+  
+  .faculty-tag {
+    background: linear-gradient(45deg, #ff6b35, #ff8e53);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: white;
+  }
+  
+  /* Contact Information */
+  .contact-info p {
+    margin: 10px 0;
+    font-size: 1.1rem;
+  }
+  
+  .contact-info strong {
+    color: #ffd700;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .nul-logo-section {
+      flex-direction: column;
+      gap: 20px;
+      text-align: center;
+    }
+  
+    .nul-title {
+      font-size: 2rem;
+    }
+  
+    .study-button {
+      font-size: 1.2rem;
+      padding: 15px 30px;
+    }
+  
+    .programs-grid {
+      grid-template-columns: 1fr;
+    }
+  
+    .faculties-list {
+      justify-content: center;
+    }
+  
+    .nul-header {
+      padding: 20px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .nul-title {
+      font-size: 1.5rem;
+    }
+  
+    .anniversary-years {
+      font-size: 24px;
+    }
+  
+    .study-button {
+      font-size: 1rem;
+      padding: 12px 24px;
+    }
+  
+    .info-section {
+      padding: 20px;
+    }
+  }
+  
+  /* Animation for logo */
+  @keyframes logoGlow {
+    0%, 100% {
+      box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+    }
+    50% {
+      box-shadow: 0 4px 25px rgba(255, 107, 53, 0.6);
+    }
+  }
+  
+  .logo-circle {
+    animation: logoGlow 2s ease-in-out infinite;
+  }

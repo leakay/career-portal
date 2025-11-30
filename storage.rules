@@ -1,0 +1,36 @@
+// Storage rules for career platform
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Profile pictures - Users can read/write their own, admin can read all
+    match /profile-pictures/{userId}/{allPaths=**} {
+      allow read: if request.auth != null &&
+        (request.auth.uid == userId || request.auth.token.admin == true);
+      allow write: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null;
+    }
+
+    // Documents - Students can read/write their own documents, admin can read all
+    match /documents/{userId}/{allPaths=**} {
+      allow read: if request.auth != null &&
+        (request.auth.uid == userId || request.auth.token.admin == true);
+      allow write: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null;
+    }
+
+    // Company logos - Anyone can read, companies can write their own
+    match /company-logos/{companyId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null &&
+        (request.auth.token.admin == true || request.auth.uid == companyId);
+      allow create: if request.auth != null;
+    }
+
+    // Institution logos - Anyone can read, institutions can write their own
+    match /institution-logos/{institutionId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null &&
+        (request.auth.token.admin == true || request.auth.uid == institutionId);
+      allow create: if request.auth != null;
+    }
+  }
+}

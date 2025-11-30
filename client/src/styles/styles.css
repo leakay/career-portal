@@ -1,0 +1,35 @@
+.theme-root{
+	--navy-light: #0f2b4c; /* light navy */
+	--navy-medium: #0b2340;
+	--accent-grey: #f1f3f5;
+	--panel-white: #ffffff;
+	--muted-grey: #6c757d;
+}
+
+body {
+	background: linear-gradient(180deg, var(--navy-light) 0%, var(--navy-medium) 30%, var(--accent-grey) 100%);
+	color: #1f2937;
+	min-height: 100vh;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+}
+
+.app-container {
+	background: rgba(255,255,255,0.95);
+	border-radius: 8px;
+	padding: 1rem;
+}
+
+.hamburger-btn {
+	border: 1px solid rgba(255,255,255,0.12);
+	background: transparent;
+	color: #ffffff;
+}
+
+.hamburger-icon { font-size: 1.2rem; }
+
+.hamburger-offcanvas .offcanvas-body { background: var(--panel-white); color: #0b2b4c; }
+.hamburger-offcanvas .offcanvas-header { border-bottom: 1px solid #e9ecef; }
+.hamburger-nav .nav-item { padding: 0.6rem 0.25rem; border-bottom: 1px dashed #e9ecef; }
+.hamburger-nav .nav-desc { font-size: 0.85rem; color: var(--muted-grey); }
+
+.card-custom{background:#ffffff;border:none;color:#0b2340;}

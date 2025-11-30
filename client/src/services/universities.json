@@ -1,0 +1,107 @@
+{
+  "universities": [
+    {
+      "id": "limkokwing",
+      "name": "Limkokwing University of Creative Technology",
+      "shortName": "Limkokwing University",
+      "type": "Private",
+      "established": "1991",
+      "location": "Maseru, Lesotho",
+      "website": "https://www.limkokwing.net/ls/",
+      "phone": "+266 2231 3785",
+      "email": "info@limkokwing.co.ls",
+      "description": "A innovative university focusing on creative industry education with global presence across three continents.",
+      "logo": "🎨",
+      "colors": {
+        "primary": "#FF6B35",
+        "secondary": "#2EC4B6"
+      },
+      "features": [
+        "Creative Technology Focus",
+        "Industry-Linked Programs",
+        "International Network",
+        "Modern Campus Facilities"
+      ],
+      "programs": 45,
+      "students": 2500,
+      "campuses": 1,
+      "ranking": "Leading Creative University in Africa",
+      "socialMedia": {
+        "facebook": "https://facebook.com/limkokwinglesotho",
+        "twitter": "https://twitter.com/limkokwingls",
+        "instagram": "https://instagram.com/limkokwinglesotho"
+      }
+    },
+    {
+      "id": "nul",
+      "name": "National University of Lesotho",
+      "shortName": "NUL",
+      "type": "Public",
+      "established": "1945",
+      "location": "Roma, Lesotho",
+      "website": "https://www.nul.ls/",
+      "phone": "+266 5221 3400",
+      "email": "admissions@nul.ls",
+      "description": "The premier institution of higher learning in Lesotho offering diverse academic programs across multiple faculties.",
+      "logo": "🏛️",
+      "colors": {
+        "primary": "#003366",
+        "secondary": "#FFD700"
+      },
+      "features": [
+        "Comprehensive Programs",
+        "Research Excellence",
+        "Historic Institution",
+        "Strong Alumni Network"
+      ],
+      "programs": 120,
+      "students": 8000,
+      "campuses": 1,
+      "ranking": "Top University in Lesotho",
+      "socialMedia": {
+        "facebook": "https://facebook.com/nationaluniversitylesotho",
+        "twitter": "https://twitter.com/nul_lesotho",
+        "linkedin": "https://linkedin.com/school/national-university-of-lesotho"
+      }
+    },
+    {
+      "id": "botho",
+      "name": "Botho University",
+      "shortName": "Botho University",
+      "type": "Private",
+      "established": "1997",
+      "location": "Maseru, Lesotho",
+      "website": "https://www.botho.ac.ls/",
+      "phone": "+266 2231 2577",
+      "email": "info@botho.ac.ls",
+      "description": "A leading private university known for professional and vocational education with multiple campuses across Southern Africa.",
+      "logo": "💼",
+      "colors": {
+        "primary": "#8B0000",
+        "secondary": "#FFA500"
+      },
+      "features": [
+        "Professional Education",
+        "Industry Partnerships",
+        "Flexible Learning",
+        "Career-Focused Programs"
+      ],
+      "programs": 65,
+      "students": 4000,
+      "campuses": 1,
+      "ranking": "Leading Private University in Lesotho",
+      "socialMedia": {
+        "facebook": "https://facebook.com/bothouniversity",
+        "twitter": "https://twitter.com/bothouniversity",
+        "instagram": "https://instagram.com/bothouniversity"
+      }
+    }
+  ],
+  "statistics": {
+    "totalUniversities": 3,
+    "totalPrograms": 230,
+    "totalStudents": 14500,
+    "publicUniversities": 1,
+    "privateUniversities": 2
+  }
+}

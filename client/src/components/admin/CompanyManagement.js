@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Card, Button, Table, Container, Alert } from "react-bootstrap";
 import { Link } from 'react-router-dom';
-import { realApi } from '../../api/config';
+import { realApi } from '../../services/realApi';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function CompanyManagement() {

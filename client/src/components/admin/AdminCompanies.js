@@ -1,51 +1,94 @@
 // src/components/admin/AdminCompanies.js
 import React, { useState, useEffect } from 'react';
-import { Container, Card, Table, Button, Badge, Alert } from 'react-bootstrap';
+import { Container, Card, Table, Button, Badge, Alert, Spinner } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import axios from 'axios';
 
 const AdminCompanies = () => {
   const { logout } = useAuth();
   const [companies, setCompanies] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-  // Mock data - replace with actual API call
-  useEffect(() => {
-    setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setCompanies([
-        {
-          id: '1',
-          name: 'Tech Solutions Inc.',
-          email: 'contact@techsolutions.com',
-          status: 'approved',
-          jobsPosted: 5,
-          createdAt: new Date('2024-01-15')
-        },
-        {
-          id: '2',
-          name: 'Innovate Corp',
-          email: 'hr@innovatecorp.com',
-          status: 'pending',
-          jobsPosted: 0,
-          createdAt: new Date('2024-02-01')
-        }
-      ]);
+  // Fetch companies from Firebase API
+  const fetchCompanies = async () => {
+    try {
+      setLoading(true);
+      setError('');
+
+      const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+      const response = await axios.get(`${API_BASE}/companies`);
+
+      if (response.data.success) {
+        setCompanies(response.data.data);
+        setSuccess(`Loaded ${response.data.data.length} companies from database`);
+      } else {
+        setError('Failed to fetch companies');
+      }
+    } catch (err) {
+      console.error('Error fetching companies:', err);
+      setError('Failed to load companies: ' + (err.response?.data?.error || err.message));
+      // Fallback to empty array
+      setCompanies([]);
+    } finally {
       setLoading(false);
-    }, 1000);
-  }, []);
-
-  const handleApprove = (companyId) => {
-    setCompanies(companies.map(company =>
-      company.id === companyId ? { ...company, status: 'approved' } : company
-    ));
+    }
   };
 
-  const handleSuspend = (companyId) => {
-    setCompanies(companies.map(company =>
-      company.id === companyId ? { ...company, status: 'suspended' } : company
-    ));
+  useEffect(() => {
+    fetchCompanies();
+  }, []);
+
+  const handleApprove = async (companyId) => {
+    try {
+      setError('');
+      const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+      const response = await axios.patch(`${API_BASE}/companies/${companyId}/status`, {
+        status: 'approved'
+      });
+
+      if (response.data.success) {
+        setSuccess('Company approved successfully');
+        // Update local state
+        setCompanies(companies.map(company =>
+          company.id === companyId ? { ...company, status: 'approved' } : company
+        ));
+      } else {
+        setError('Failed to approve company');
+      }
+    } catch (err) {
+      console.error('Error approving company:', err);
+      setError('Failed to approve company: ' + (err.response?.data?.error || err.message));
+    }
+  };
+
+  const handleSuspend = async (companyId) => {
+    const company = companies.find(c => c.id === companyId);
+    const newStatus = company.status === 'suspended' ? 'approved' : 'suspended';
+    const actionText = newStatus === 'suspended' ? 'suspend' : 'unsuspend';
+
+    try {
+      setError('');
+      const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+      const response = await axios.patch(`${API_BASE}/companies/${companyId}/status`, {
+        status: newStatus
+      });
+
+      if (response.data.success) {
+        setSuccess(`Company ${actionText}ed successfully`);
+        // Update local state
+        setCompanies(companies.map(company =>
+          company.id === companyId ? { ...company, status: newStatus } : company
+        ));
+      } else {
+        setError(`Failed to ${actionText} company`);
+      }
+    } catch (err) {
+      console.error(`Error ${actionText}ing company:`, err);
+      setError(`Failed to ${actionText} company: ` + (err.response?.data?.error || err.message));
+    }
   };
 
   if (loading) {
@@ -74,9 +117,24 @@ const AdminCompanies = () => {
           <Button variant="outline-danger" onClick={() => logout()}>
             Logout
           </Button>
-          <Button variant="primary">Refresh</Button>
+          <Button variant="primary" onClick={fetchCompanies} disabled={loading}>
+            {loading ? <Spinner size="sm" /> : '🔄 Refresh'}
+          </Button>
         </div>
       </div>
+
+      {/* Success/Error Alerts */}
+      {error && (
+        <Alert variant="danger" className="mb-4" dismissible onClose={() => setError('')}>
+          <Alert.Heading>Connection Error</Alert.Heading>
+          {error}
+        </Alert>
+      )}
+      {success && (
+        <Alert variant="success" className="mb-4" dismissible onClose={() => setSuccess('')}>
+          {success}
+        </Alert>
+      )}
 
       <Card>
         <Card.Header>
@@ -113,7 +171,14 @@ const AdminCompanies = () => {
                     <td>
                       <Badge bg="info">{company.jobsPosted}</Badge>
                     </td>
-                    <td>{company.createdAt.toLocaleDateString()}</td>
+                    <td>
+                      {company.createdAt
+                        ? (company.createdAt.toDate
+                            ? company.createdAt.toDate().toLocaleDateString()
+                            : new Date(company.createdAt).toLocaleDateString())
+                        : 'N/A'
+                      }
+                    </td>
                     <td>
                       {company.status === 'pending' && (
                         <Button

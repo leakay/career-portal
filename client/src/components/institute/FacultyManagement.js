@@ -14,9 +14,9 @@ const FacultyManagement = ({ onBack }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [facultyToDelete, setFacultyToDelete] = useState(null);
 
-  // Get instituteId from user profile
+  // Get instituteId from user profile (check institutionId first as that's what Login.js stores)
   const getInstituteId = () => {
-    const instituteId = userProfile?.instituteId || userProfile?.institutionId;
+    const instituteId = userProfile?.institutionId || userProfile?.instituteId;
     if (!instituteId) {
       setError('Institute ID not found in user profile. Please log in again.');
       return null;

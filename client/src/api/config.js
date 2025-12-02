@@ -7,6 +7,9 @@ const API_BASE_URL = isDevelopment
   ? 'http://localhost:5000'
   : (process.env.REACT_APP_API_BASE_URL || 'https://us-central1-leakay-11570.cloudfunctions.net/api');
 
+// Check if we're in production but Firebase Functions are not available
+const isProductionWithoutFunctions = !isDevelopment && !process.env.REACT_APP_API_BASE_URL;
+
 // Helper function to get Firebase ID token
 const getAuthToken = async () => {
   const user = auth.currentUser;
@@ -19,6 +22,9 @@ const getAuthToken = async () => {
 export const realApi = {
   // Health check
   checkHealth: async () => {
+    if (isProductionWithoutFunctions) {
+      return { status: 'OK', message: 'API not available - Firebase Functions not deployed' };
+    }
     const response = await fetch(`${API_BASE_URL}/health`);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     return await response.json();
@@ -26,6 +32,28 @@ export const realApi = {
 
   // Applications (existing)
   getApplications: async (instituteId = null) => {
+    if (isProductionWithoutFunctions) {
+      // Return mock data when Firebase Functions are not available
+      return {
+        success: true,
+        data: [
+          {
+            id: '1',
+            studentName: 'John Doe',
+            courseName: 'Computer Science',
+            status: 'pending',
+            appliedAt: new Date().toISOString()
+          },
+          {
+            id: '2',
+            studentName: 'Jane Smith',
+            courseName: 'Business Administration',
+            status: 'approved',
+            appliedAt: new Date().toISOString()
+          }
+        ]
+      };
+    }
     let url = `${API_BASE_URL}/applications`;
     if (instituteId) url = `${API_BASE_URL}/applications/institute/${instituteId}`;
 
@@ -71,6 +99,25 @@ export const realApi = {
 
   // Institutions Management
   getInstitutions: async () => {
+    if (isProductionWithoutFunctions) {
+      // Return mock data when Firebase Functions are not available
+      return {
+        success: true,
+        data: [
+          {
+            id: 'inst_limkokwing',
+            name: 'Limkokwing University of Creative Technology',
+            code: 'LKUCT',
+            type: 'Private University',
+            location: 'Maseru, Lesotho',
+            contactEmail: 'info@limkokwing.co.ls',
+            description: 'Leading creative technology university in Lesotho',
+            status: 'active',
+            createdAt: new Date().toISOString()
+          }
+        ]
+      };
+    }
     const response = await fetch(`${API_BASE_URL}/institutions`);
     if (!response.ok) throw new Error(`Failed to fetch institutions: ${response.status}`);
     return await response.json();
@@ -108,6 +155,41 @@ export const realApi = {
 
   // Get faculties by institution
   getFaculties: async (institutionId) => {
+    if (isProductionWithoutFunctions) {
+      // Return mock data when Firebase Functions are not available
+      return {
+        success: true,
+        data: [
+          {
+            id: 'fac_fit',
+            institutionId: institutionId,
+            name: 'Faculty of Information Technology',
+            code: 'FIT',
+            description: 'Computer Science, Software Engineering, and IT programs',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          },
+          {
+            id: 'fac_bus',
+            institutionId: institutionId,
+            name: 'Faculty of Business',
+            code: 'BUS',
+            description: 'Business Administration, Finance, and Management programs',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          },
+          {
+            id: 'fac_des',
+            institutionId: institutionId,
+            name: 'Faculty of Design',
+            code: 'DES',
+            description: 'Graphic Design, Multimedia, and Creative Arts programs',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          }
+        ]
+      };
+    }
     const response = await fetch(`${API_BASE_URL}/institutions/${institutionId}/faculties`);
     if (!response.ok) throw new Error(`Failed to fetch faculties: ${response.status}`);
     return await response.json();

@@ -9,24 +9,54 @@ dotenv.config();
 
 const app = express();
 
-// Load service account
-const serviceAccount = require('./serviceAccountKey.json');
-
+// Firebase configuration for Render deployment
 let db;
 try {
-  console.log('Initializing Firebase with project:', serviceAccount.project_id);
-  
-  // Initialize Firebase Admin
-  initializeApp({
-    credential: cert(serviceAccount),
-    databaseURL: `https://${serviceAccount.project_id}.firebaseio.com`
-  });
+  console.log('Initializing Firebase...');
+
+  // Check if we're in production (Render) or development
+  if (process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL) {
+    // Production: Use environment variables
+    console.log('Using Firebase environment variables for production');
+
+    const serviceAccount = {
+      type: "service_account",
+      project_id: process.env.FIREBASE_PROJECT_ID || "leakay-11570",
+      private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
+      private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+      client_email: process.env.FIREBASE_CLIENT_EMAIL,
+      client_id: process.env.FIREBASE_CLIENT_ID,
+      auth_uri: process.env.FIREBASE_AUTH_URI || "https://accounts.google.com/o/oauth2/auth",
+      token_uri: process.env.FIREBASE_TOKEN_URI || "https://oauth2.googleapis.com/token",
+      auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+      client_x509_cert_url: `https://www.googleapis.com/robot/v1/metadata/x509/${process.env.FIREBASE_CLIENT_EMAIL}`
+    };
+
+    initializeApp({
+      credential: cert(serviceAccount),
+      databaseURL: `https://${serviceAccount.project_id}.firebaseio.com`
+    });
+  } else {
+    // Development: Try to load serviceAccountKey.json
+    try {
+      const serviceAccount = require('./serviceAccountKey.json');
+      console.log('Using serviceAccountKey.json for development');
+
+      initializeApp({
+        credential: cert(serviceAccount),
+        databaseURL: `https://${serviceAccount.project_id}.firebaseio.com`
+      });
+    } catch (devError) {
+      console.error('❌ Firebase initialization failed in development:', devError.message);
+      console.log('Please make sure serviceAccountKey.json exists or set Firebase environment variables');
+      process.exit(1);
+    }
+  }
 
   db = getFirestore();
   console.log('✅ Firebase Admin initialized successfully');
 } catch (error) {
   console.error('❌ Firebase initialization failed:', error.message);
-  console.log('Please make sure serviceAccountKey.json exists in the functions folder');
   process.exit(1);
 }
 
@@ -2318,18 +2348,16 @@ const functions = require('firebase-functions');
 // Export for Firebase Functions
 exports.api = functions.https.onRequest(app);
 
-// For local development
-if (require.main === module) {
-  const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => {
-    console.log(`🎉 Admin Server running on port ${PORT}`);
-    console.log(`📍 Health check: http://localhost:${PORT}/health`);
-    console.log(`📍 All jobs: http://localhost:${PORT}/jobs`);
-    console.log(`📍 Post job: POST http://localhost:${PORT}/jobs`);
-    console.log(`📍 All applications: http://localhost:${PORT}/applications`);
-    console.log(`📍 All institutions: http://localhost:${PORT}/institutions`);
-    console.log(`📍 All companies: http://localhost:${PORT}/companies`);
-    console.log(`📍 System stats: http://localhost:${PORT}/admin/stats`);
-    console.log(`📍 Institute apps: http://localhost:${PORT}/applications/institute/limkokwing`);
-  });
-}
+// For local development and Render deployment
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`🎉 Server running on port ${PORT}`);
+  console.log(`📍 Health check: http://localhost:${PORT}/health`);
+  console.log(`📍 All jobs: http://localhost:${PORT}/jobs`);
+  console.log(`📍 Post job: POST http://localhost:${PORT}/jobs`);
+  console.log(`📍 All applications: http://localhost:${PORT}/applications`);
+  console.log(`📍 All institutions: http://localhost:${PORT}/institutions`);
+  console.log(`📍 All companies: http://localhost:${PORT}/companies`);
+  console.log(`📍 System stats: http://localhost:${PORT}/admin/stats`);
+  console.log(`📍 Institute apps: http://localhost:${PORT}/applications/institute/limkokwing`);
+});

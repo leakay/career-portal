@@ -1,0 +1,34 @@
+{
+  "name": "career-portal",
+  "version": "1.0.0",
+  "description": "Career Portal Application - Full Stack",
+  "main": "index.js",
+  "scripts": {
+    "start": "cd client && npm start",
+    "build": "cd client && npm run build",
+    "test": "cd client && npm test",
+    "eject": "cd client && npm run eject",
+    "install-client": "cd client && npm install",
+    "install-backend": "cd backend/functions && npm install",
+    "install-all": "npm run install-backend && npm run install-client",
+    "dev": "concurrently \"cd backend/functions && npm run dev\" \"cd client && npm start\"",
+    "deploy": "npm run build"
+  },
+  "keywords": [
+    "career-portal",
+    "react",
+    "firebase",
+    "express",
+    "career",
+    "portal"
+  ],
+  "author": "Career Portal Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
+}

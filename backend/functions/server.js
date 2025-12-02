@@ -30,7 +30,12 @@ try {
   process.exit(1);
 }
 
-app.use(cors({ origin: true }));
+app.use(cors({
+  origin: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  credentials: true
+}));
 app.use(express.json());
 
 // Health check endpoint
@@ -217,9 +222,9 @@ app.post('/institutions/:institutionId/faculties', async (req, res) => {
   try {
     const { institutionId } = req.params;
     const { name, description, code } = req.body;
-    
+
     console.log(`Adding faculty to institution ${institutionId}:`, { name, code });
-    
+
     const facultyData = {
       institutionId,
       name,
@@ -230,7 +235,7 @@ app.post('/institutions/:institutionId/faculties', async (req, res) => {
     };
 
     const docRef = await db.collection('faculties').add(facultyData);
-    
+
     res.json({
       success: true,
       message: 'Faculty added successfully',
@@ -241,6 +246,72 @@ app.post('/institutions/:institutionId/faculties', async (req, res) => {
     });
   } catch (error) {
     console.error('Error adding faculty:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Update faculty
+app.put('/faculties/:facultyId', async (req, res) => {
+  try {
+    const { facultyId } = req.params;
+    const updateData = {
+      ...req.body,
+      updatedAt: new Date()
+    };
+
+    console.log(`Updating faculty ${facultyId}:`, updateData);
+
+    // Check if faculty exists
+    const facultyDoc = await db.collection('faculties').doc(facultyId).get();
+    if (!facultyDoc.exists) {
+      return res.status(404).json({
+        success: false,
+        error: 'Faculty not found'
+      });
+    }
+
+    await db.collection('faculties').doc(facultyId).update(updateData);
+
+    res.json({
+      success: true,
+      message: 'Faculty updated successfully'
+    });
+  } catch (error) {
+    console.error('Error updating faculty:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Delete faculty
+app.delete('/faculties/:facultyId', async (req, res) => {
+  try {
+    const { facultyId } = req.params;
+
+    console.log(`Deleting faculty: ${facultyId}`);
+
+    // Check if faculty exists
+    const facultyDoc = await db.collection('faculties').doc(facultyId).get();
+    if (!facultyDoc.exists) {
+      return res.status(404).json({
+        success: false,
+        error: 'Faculty not found'
+      });
+    }
+
+    await db.collection('faculties').doc(facultyId).delete();
+
+    res.json({
+      success: true,
+      message: 'Faculty deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting faculty:', error);
     res.status(500).json({
       success: false,
       error: error.message
@@ -334,9 +405,9 @@ app.post('/faculties/:facultyId/courses', async (req, res) => {
   try {
     const { facultyId } = req.params;
     const { name, code, duration, requirements, description, capacity } = req.body;
-    
+
     console.log(`Adding course to faculty ${facultyId}:`, { name, code });
-    
+
     const courseData = {
       facultyId,
       name,
@@ -351,7 +422,7 @@ app.post('/faculties/:facultyId/courses', async (req, res) => {
     };
 
     const docRef = await db.collection('courses').add(courseData);
-    
+
     res.json({
       success: true,
       message: 'Course added successfully',
@@ -369,55 +440,117 @@ app.post('/faculties/:facultyId/courses', async (req, res) => {
   }
 });
 
+// Update course
+app.put('/courses/:courseId', async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const updateData = {
+      ...req.body,
+      updatedAt: new Date()
+    };
+
+    console.log(`Updating course ${courseId}:`, updateData);
+
+    // Check if course exists
+    const courseDoc = await db.collection('courses').doc(courseId).get();
+    if (!courseDoc.exists) {
+      return res.status(404).json({
+        success: false,
+        error: 'Course not found'
+      });
+    }
+
+    await db.collection('courses').doc(courseId).update(updateData);
+
+    res.json({
+      success: true,
+      message: 'Course updated successfully'
+    });
+  } catch (error) {
+    console.error('Error updating course:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // ==================== COMPANIES MANAGEMENT ====================
 
-// Get all companies
+// Get all companies (from users collection where role is 'company')
 app.get('/companies', async (req, res) => {
   try {
     const { status } = req.query;
 
     console.log('Fetching companies with status:', status);
 
-    let query = db.collection('companies');
-
-    if (status) {
-      query = query.where('status', '==', status);
-    }
+    let query = db.collection('users').where('role', '==', 'company');
 
     const snapshot = await query.get();
 
-    // Get jobs count for each company
+    // Get jobs count and company profile for each company user
     const companiesWithJobsCount = await Promise.all(
       snapshot.docs.map(async (doc) => {
-        const companyData = doc.data();
+        const userData = doc.data();
 
         try {
-          // Count active jobs for this company
+          // Count active jobs for this company (using employer field)
           const jobsSnapshot = await db.collection('jobs')
-            .where('companyId', '==', doc.id)
+            .where('employer', '==', doc.id)
             .where('status', '==', 'active')
             .get();
 
+          // Get company profile if it exists
+          let companyProfile = {};
+          try {
+            const companyDoc = await db.collection('companies').doc(doc.id).get();
+            if (companyDoc.exists) {
+              companyProfile = companyDoc.data();
+            }
+          } catch (profileError) {
+            console.log(`No company profile found for ${doc.id}`);
+          }
+
           return {
             id: doc.id,
-            ...companyData,
-            jobsPosted: jobsSnapshot.size
+            name: userData.companyName || userData.name || 'N/A',
+            email: userData.email || 'N/A',
+            status: companyProfile.status || userData.status || 'pending',
+            jobsPosted: jobsSnapshot.size,
+            createdAt: userData.createdAt || companyProfile.createdAt,
+            industry: companyProfile.industry || 'N/A',
+            location: companyProfile.location || 'N/A',
+            website: companyProfile.website || 'N/A',
+            description: companyProfile.description || 'N/A'
           };
         } catch (error) {
-          console.error(`Error fetching jobs for company ${doc.id}:`, error);
+          console.error(`Error fetching data for company ${doc.id}:`, error);
           return {
             id: doc.id,
-            ...companyData,
-            jobsPosted: 0
+            name: userData.companyName || userData.name || 'N/A',
+            email: userData.email || 'N/A',
+            status: userData.status || 'pending',
+            jobsPosted: 0,
+            createdAt: userData.createdAt,
+            industry: 'N/A',
+            location: 'N/A',
+            website: 'N/A',
+            description: 'N/A'
           };
         }
       })
     );
 
-    console.log(`Found ${companiesWithJobsCount.length} companies`);
+    // Filter by status if provided
+    let filteredCompanies = companiesWithJobsCount;
+    if (status) {
+      filteredCompanies = companiesWithJobsCount.filter(company => company.status === status);
+    }
+
+    console.log(`Found ${filteredCompanies.length} companies`);
     res.json({
       success: true,
-      data: companiesWithJobsCount
+      data: filteredCompanies
     });
   } catch (error) {
     console.error('Error fetching companies:', error);
@@ -718,6 +851,25 @@ app.patch('/companies/:companyId/status', async (req, res) => {
 
     console.log(`Updating company ${companyId} status to: ${status}`);
 
+    // First check if user exists and is a company
+    const userDoc = await db.collection('users').doc(companyId).get();
+
+    if (!userDoc.exists) {
+      return res.status(404).json({
+        success: false,
+        error: 'Company not found'
+      });
+    }
+
+    const userData = userDoc.data();
+
+    if (userData.role !== 'company') {
+      return res.status(400).json({
+        success: false,
+        error: 'User is not a company'
+      });
+    }
+
     const updateData = {
       status: status,
       updatedAt: new Date()
@@ -728,7 +880,51 @@ app.patch('/companies/:companyId/status', async (req, res) => {
       updateData.approvedAt = new Date();
     }
 
-    await db.collection('companies').doc(companyId).update(updateData);
+    // Update or create company profile (primary storage for status)
+    try {
+      const companyProfileData = {
+        companyName: userData.companyName || userData.name || '',
+        industry: '',
+        size: '',
+        website: '',
+        description: '',
+        contactEmail: userData.email || '',
+        phone: '',
+        address: '',
+        foundedYear: '',
+        benefits: '',
+        culture: '',
+        logo: '',
+        linkedin: '',
+        twitter: '',
+        facebook: '',
+        status: status,
+        userId: companyId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        approvedAt: status === 'approved' ? new Date() : null
+      };
+
+      // Use set with merge to update existing or create new
+      await db.collection('companies').doc(companyId).set(companyProfileData, { merge: true });
+      console.log(`Updated/created company profile for ${companyId}`);
+    } catch (profileError) {
+      console.error(`Error updating company profile for ${companyId}:`, profileError);
+      // Continue with user update even if profile update fails
+    }
+
+    // Also update user document for consistency
+    try {
+      await db.collection('users').doc(companyId).update({
+        status: status,
+        updatedAt: new Date()
+      });
+      console.log(`Updated user status for ${companyId}`);
+    } catch (userError) {
+      console.error(`Error updating user status for ${companyId}:`, userError);
+      // This is critical, so if user update fails, we should fail the whole operation
+      throw userError;
+    }
 
     res.json({
       success: true,
@@ -846,6 +1042,73 @@ app.post('/institutions/:institutionId/publish-admissions', async (req, res) => 
     });
   } catch (error) {
     console.error('Error publishing admissions:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Publish admission decisions for approved applications
+app.post('/institutions/:institutionId/publish-admissions-decisions', async (req, res) => {
+  try {
+    const { institutionId } = req.params;
+    const { applicationIds } = req.body;
+
+    console.log(`Publishing admission decisions for institution ${institutionId}, applications:`, applicationIds);
+
+    if (!applicationIds || !Array.isArray(applicationIds) || applicationIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'applicationIds array is required and cannot be empty'
+      });
+    }
+
+    // Verify that all applications belong to this institution and are approved
+    const batch = db.batch();
+    let publishedCount = 0;
+
+    for (const applicationId of applicationIds) {
+      const applicationDoc = await db.collection('applications').doc(applicationId).get();
+
+      if (!applicationDoc.exists) {
+        console.log(`Application ${applicationId} not found, skipping`);
+        continue;
+      }
+
+      const application = applicationDoc.data();
+
+      // Verify the application belongs to this institution and is approved
+      if (application.institutionId === institutionId && application.status === 'approved') {
+        batch.update(applicationDoc.ref, {
+          admissionPublished: true,
+          admissionPublishedAt: new Date(),
+          updatedAt: new Date()
+        });
+        publishedCount++;
+      } else {
+        console.log(`Application ${applicationId} does not belong to institution ${institutionId} or is not approved, skipping`);
+      }
+    }
+
+    if (publishedCount === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'No valid approved applications found to publish'
+      });
+    }
+
+    await batch.commit();
+
+    console.log(`Successfully published ${publishedCount} admission decisions`);
+
+    res.json({
+      success: true,
+      message: `Successfully published ${publishedCount} admission decisions`,
+      publishedCount: publishedCount
+    });
+  } catch (error) {
+    console.error('Error publishing admission decisions:', error);
     res.status(500).json({
       success: false,
       error: error.message
@@ -2050,17 +2313,23 @@ app.post('/admin/accounts', verifyAdminToken, async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🎉 Admin Server running on port ${PORT}`);
-  console.log(`📍 Health check: http://localhost:${PORT}/health`);
-  console.log(`📍 All jobs: http://localhost:${PORT}/jobs`);
-  console.log(`📍 Post job: POST http://localhost:${PORT}/jobs`);
-  console.log(`📍 All applications: http://localhost:${PORT}/applications`);
-  console.log(`📍 All institutions: http://localhost:${PORT}/institutions`);
-  console.log(`📍 All companies: http://localhost:${PORT}/companies`);
-  console.log(`📍 System stats: http://localhost:${PORT}/admin/stats`);
-  console.log(`📍 Institute apps: http://localhost:${PORT}/applications/institute/limkokwing`);
-});
+const functions = require('firebase-functions');
 
-module.exports = app;
+// Export for Firebase Functions
+exports.api = functions.https.onRequest(app);
+
+// For local development
+if (require.main === module) {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`🎉 Admin Server running on port ${PORT}`);
+    console.log(`📍 Health check: http://localhost:${PORT}/health`);
+    console.log(`📍 All jobs: http://localhost:${PORT}/jobs`);
+    console.log(`📍 Post job: POST http://localhost:${PORT}/jobs`);
+    console.log(`📍 All applications: http://localhost:${PORT}/applications`);
+    console.log(`📍 All institutions: http://localhost:${PORT}/institutions`);
+    console.log(`📍 All companies: http://localhost:${PORT}/companies`);
+    console.log(`📍 System stats: http://localhost:${PORT}/admin/stats`);
+    console.log(`📍 Institute apps: http://localhost:${PORT}/applications/institute/limkokwing`);
+  });
+}

@@ -96,11 +96,11 @@ const CompanyDashboard = () => {
             'Content-Type': 'application/json'
           }
         }),
-        fetch('http://localhost:5000/jobs'),
-        fetch('http://localhost:5000/applications'),
-        fetch('http://localhost:5000/institutions'),
-        fetch('http://localhost:5000/companies'),
-        fetch('http://localhost:5000/health')
+        fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/jobs`),
+        fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/applications`),
+        fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/institutions`),
+        fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/companies`),
+        fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/health`)
       ]);
 
       // Process company stats

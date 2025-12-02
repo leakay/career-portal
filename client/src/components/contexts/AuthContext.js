@@ -50,6 +50,10 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     await signOut(auth);
+    // Clear local storage
+    localStorage.removeItem('userType');
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('instituteId');
   };
 
   const isPredefinedAdmin = userProfile?.role === 'admin';

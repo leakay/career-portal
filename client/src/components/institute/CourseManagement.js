@@ -6,7 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import './CourseManagement.css';
 
 const CourseManagement = ({ onBack }) => {
-  const { logout } = useAuth();
+  const { userProfile, logout } = useAuth();
   const [courses, setCourses] = useState([]);
   const [faculties, setFaculties] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -22,11 +22,11 @@ const CourseManagement = ({ onBack }) => {
   });
   const [editingCourse, setEditingCourse] = useState(null);
 
-  // Get instituteId with better error handling
+  // Get instituteId from user profile
   const getInstituteId = () => {
-    const instituteId = localStorage.getItem('instituteId');
+    const instituteId = userProfile?.instituteId || userProfile?.institutionId;
     if (!instituteId) {
-      setError('Institute ID not found. Please log in again.');
+      setError('Institute ID not found in user profile. Please log in again.');
       return null;
     }
     return instituteId;
@@ -35,10 +35,10 @@ const CourseManagement = ({ onBack }) => {
   // Fetch courses and faculties on component mount
   useEffect(() => {
     console.log('Component mounted, fetching data...');
-    console.log('Institute ID from localStorage:', localStorage.getItem('instituteId'));
+    console.log('Institute ID from userProfile:', userProfile?.instituteId || userProfile?.institutionId);
     fetchCourses();
     fetchFaculties();
-  }, []);
+  }, [userProfile]);
 
   const fetchCourses = async () => {
     try {
@@ -137,19 +137,34 @@ const CourseManagement = ({ onBack }) => {
       let response;
       if (editingCourse) {
         // Update existing course
+        console.log('Updating course with ID:', editingCourse.id, 'Data:', courseData);
+        console.log('Editing course object:', editingCourse);
+
+        // Check if course still exists in current courses list
+        const courseExists = courses.some(c => c.id === editingCourse.id);
+        console.log('Course exists in current list:', courseExists);
+
+        if (!courseExists) {
+          setError('Course no longer exists. Please refresh the page.');
+          return;
+        }
+
         response = await realApi.updateCourse(editingCourse.id, courseData);
         if (response.success) {
           alert('Course updated successfully!');
         } else {
+          console.error('Update failed:', response);
           setError(response.error || 'Failed to update course');
           return;
         }
       } else {
         // Add new course
+        console.log('Adding course to faculty:', formData.facultyId, 'Data:', courseData);
         response = await realApi.addCourse(formData.facultyId, courseData);
         if (response.success) {
           alert('Course added successfully!');
         } else {
+          console.error('Add failed:', response);
           setError(response.error || 'Failed to add course');
           return;
         }

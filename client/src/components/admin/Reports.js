@@ -16,7 +16,7 @@ export default function Reports() {
     const fetchReports = async () => {
       try {
         const API_BASE =
-          process.env.REACT_APP_API_BASE || "http://localhost:5000";
+          process.env.REACT_APP_API_URL || "http://localhost:5000";
         const res = await axios.get(`${API_BASE}/admin/overview`);
         setReports(res.data);
       } catch (err) {

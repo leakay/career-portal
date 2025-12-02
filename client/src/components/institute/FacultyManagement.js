@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Card, Button, Form, Table, Modal, Alert, Spinner } from 'react-bootstrap';
 import { realApi } from '../../api/config';
+import { useAuth } from '../contexts/AuthContext';
 
 const FacultyManagement = ({ onBack }) => {
+  const { userProfile } = useAuth();
   const [faculties, setFaculties] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -12,11 +14,11 @@ const FacultyManagement = ({ onBack }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [facultyToDelete, setFacultyToDelete] = useState(null);
 
-  // Get instituteId with better error handling
+  // Get instituteId from user profile
   const getInstituteId = () => {
-    const instituteId = localStorage.getItem('instituteId');
+    const instituteId = userProfile?.instituteId || userProfile?.institutionId;
     if (!instituteId) {
-      setError('Institute ID not found. Please log in again.');
+      setError('Institute ID not found in user profile. Please log in again.');
       return null;
     }
     return instituteId;
@@ -25,9 +27,9 @@ const FacultyManagement = ({ onBack }) => {
   // Fetch faculties on component mount
   useEffect(() => {
     console.log('Component mounted, fetching faculties...');
-    console.log('Institute ID from localStorage:', localStorage.getItem('instituteId'));
+    console.log('Institute ID from userProfile:', userProfile?.instituteId || userProfile?.institutionId);
     fetchFaculties();
-  }, []);
+  }, [userProfile]);
 
   const fetchFaculties = async () => {
     try {
@@ -73,12 +75,37 @@ const FacultyManagement = ({ onBack }) => {
       let response;
       if (editingFaculty) {
         // Update existing faculty
+        console.log('Updating faculty with ID:', editingFaculty.id, 'Data:', facultyData);
+        console.log('Editing faculty object:', editingFaculty);
+
+        // Check if faculty still exists in current faculties list
+        const facultyExists = faculties.some(f => f.id === editingFaculty.id);
+        console.log('Faculty exists in current list:', facultyExists);
+
+        if (!facultyExists) {
+          setError('Faculty no longer exists. Please refresh the page.');
+          return;
+        }
+
         response = await realApi.updateFaculty(editingFaculty.id, facultyData);
-        alert('Faculty updated successfully!');
+        if (response.success) {
+          alert('Faculty updated successfully!');
+        } else {
+          console.error('Update failed:', response);
+          setError(response.error || 'Failed to update faculty');
+          return;
+        }
       } else {
         // Add new faculty
+        console.log('Adding faculty to institute:', instituteId, 'Data:', facultyData);
         response = await realApi.addFaculty(instituteId, facultyData);
-        alert('Faculty added successfully!');
+        if (response.success) {
+          alert('Faculty added successfully!');
+        } else {
+          console.error('Add failed:', response);
+          setError(response.error || 'Failed to add faculty');
+          return;
+        }
       }
 
       if (response.success) {
@@ -87,8 +114,6 @@ const FacultyManagement = ({ onBack }) => {
         setEditingFaculty(null);
         setShowModal(false);
         fetchFaculties();
-      } else {
-        setError(response.error || 'Failed to save faculty');
       }
     } catch (error) {
       console.error('Error saving faculty:', error);

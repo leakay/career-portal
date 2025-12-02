@@ -1,7 +1,11 @@
 // src/api/config.js
 import { auth } from '../firebase';
 
-const API_BASE_URL = 'http://localhost:5000';
+// Use localhost for development, Firebase Functions for production
+const isDevelopment = process.env.NODE_ENV === 'development';
+const API_BASE_URL = isDevelopment
+  ? 'http://localhost:5000'
+  : (process.env.REACT_APP_API_BASE_URL || 'https://us-central1-leakay-11570.cloudfunctions.net/api');
 
 // Helper function to get Firebase ID token
 const getAuthToken = async () => {

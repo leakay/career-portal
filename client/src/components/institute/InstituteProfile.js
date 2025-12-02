@@ -282,11 +282,11 @@ const InstituteProfile = () => {
             <Card.Body>
               <div className="text-center">
                 <div className="mb-3">
-                  <h3 className="text-primary">1,247</h3>
+                  <h3 className="text-primary">17</h3>
                   <p className="text-muted mb-0">Total Students</p>
                 </div>
                 <div className="mb-3">
-                  <h3 className="text-success">89</h3>
+                  <h3 className="text-success">9</h3>
                   <p className="text-muted mb-0">Active Courses</p>
                 </div>
                 <div>

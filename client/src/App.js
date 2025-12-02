@@ -34,6 +34,7 @@ import AdminUsers from './components/admin/AdminUsers';
 import AdminCompanies from './components/admin/AdminCompanies';
 import AdminReports from './components/admin/AdminReports';
 import AdminAdmissions from './components/admin/AdminAdmissions';
+import AdminAdmissionsPublish from './components/admin/AdminAdmissionsPublish';
 import AdminSecurity from './components/admin/AdminSecurity';
 import AdminLogin from './components/auth/AdminLogin';
 
@@ -88,6 +89,7 @@ function App() {
             <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['admin']}><AdminUsers /></ProtectedRoute>} />
             <Route path="/admin/companies" element={<ProtectedRoute allowedRoles={['admin']}><AdminCompanies /></ProtectedRoute>} />
             <Route path="/admin/admissions" element={<ProtectedRoute allowedRoles={['admin']}><AdminAdmissions /></ProtectedRoute>} />
+            <Route path="/admin/admissions-publish" element={<ProtectedRoute allowedRoles={['admin']}><AdminAdmissionsPublish /></ProtectedRoute>} />
             <Route path="/admin/reports" element={<ProtectedRoute allowedRoles={['admin']}><AdminReports /></ProtectedRoute>} />
             <Route path="/admin/security" element={<ProtectedRoute allowedRoles={['admin']}><AdminSecurity /></ProtectedRoute>} />
 

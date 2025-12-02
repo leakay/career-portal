@@ -82,6 +82,13 @@ export default function AdminSidebar() {
       description: 'Admission management'
     },
     {
+      id: 'admissions-publish',
+      label: 'Publish Admissions',
+      icon: '📢',
+      path: '/admin/admissions-publish',
+      description: 'Publish institution admissions'
+    },
+    {
       id: 'reports',
       label: 'System Reports',
       icon: '📈',

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Alert, Spinner, Table, Badge } from 'react-bootstrap';
-import { collection, getDocs, query, where, doc, updateDoc, writeBatch } from 'firebase/firestore';
-import { signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-import { auth, db } from '../../firebase';
+import { useAuth } from '../contexts/AuthContext';
+import { realApi } from '../../api/config';
 
 
 const AdmissionPublish = () => {
+  const { logout } = useAuth();
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
@@ -20,13 +20,7 @@ const AdmissionPublish = () => {
     if (window.confirm('Are you sure you want to logout?')) {
       try {
         setLogoutLoading(true);
-        await signOut(auth);
-        
-        // Clear local storage
-        localStorage.removeItem('instituteId');
-        localStorage.removeItem('userType');
-        localStorage.removeItem('authToken');
-        
+        await logout();
         // Redirect to login page
         navigate('/login');
       } catch (error) {
@@ -46,38 +40,25 @@ const AdmissionPublish = () => {
     try {
       setLoading(true);
       setError('');
-      const instituteId = localStorage.getItem('instituteId');
-      
+      const instituteId = userProfile?.instituteId || userProfile?.institutionId;
+
       if (!instituteId) {
-        setError('Institute ID not found. Please log in again.');
+        setError('Institute ID not found in user profile. Please log in again.');
         setLoading(false);
         return;
       }
 
       console.log('Fetching applications for institute:', instituteId);
 
-      // Fetch applications
-      const applicationsQuery = query(
-        collection(db, 'applications'),
-        where('institutionId', '==', instituteId)
-      );
-      
-      const applicationsSnapshot = await getDocs(applicationsQuery);
-      console.log('Applications found:', applicationsSnapshot.size);
+      // Fetch applications using API
+      const result = await realApi.getApplicationsByInstitute(instituteId);
 
-      if (applicationsSnapshot.empty) {
-        setApplications([]);
-        setLoading(false);
-        return;
+      if (result.success) {
+        console.log('Applications found:', result.data.length);
+        setApplications(result.data);
+      } else {
+        setError(result.error || 'Failed to fetch applications');
       }
-
-      const applicationsData = applicationsSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-
-      console.log('Applications data:', applicationsData);
-      setApplications(applicationsData);
     } catch (error) {
       console.error('Error fetching applications:', error);
       setError('Failed to fetch applications: ' + error.message);
@@ -113,31 +94,33 @@ const AdmissionPublish = () => {
       setError('');
       setSuccess('');
 
-      const batch = writeBatch(db);
-      let publishedCount = 0;
+      const instituteId = userProfile?.instituteId || userProfile?.institutionId;
 
-      applications.forEach(application => {
-        if (application.status === 'approved') {
-          const applicationRef = doc(db, 'applications', application.id);
-          batch.update(applicationRef, {
-            admissionPublished: true,
-            admissionPublishedAt: new Date(),
-            updatedAt: new Date()
-          });
-          publishedCount++;
-        }
-      });
+      if (!instituteId) {
+        setError('Institute ID not found in user profile. Please log in again.');
+        return;
+      }
 
-      if (publishedCount === 0) {
+      const approvedApplications = applications.filter(app => app.status === 'approved');
+
+      if (approvedApplications.length === 0) {
         setError('No approved applications to publish.');
         return;
       }
 
-      await batch.commit();
-      setSuccess(`Successfully published ${publishedCount} admission decisions!`);
-      
-      // Refresh applications
-      fetchApplications();
+      const applicationIds = approvedApplications.map(app => app.id);
+
+      console.log('Publishing admissions for applications:', applicationIds);
+
+      const result = await realApi.publishAdmissionDecisions(instituteId, applicationIds);
+
+      if (result.success) {
+        setSuccess(`Successfully published ${approvedApplications.length} admission decisions!`);
+        // Refresh applications
+        fetchApplications();
+      } else {
+        setError(result.error || 'Failed to publish admissions');
+      }
     } catch (error) {
       console.error('Error publishing admissions:', error);
       setError('Failed to publish admissions: ' + error.message);
